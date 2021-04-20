@@ -130,10 +130,15 @@ select JNO from J where JNO not in
 select JNO from SPJ where JNO not in(select JNO from SPJ where SNO<>'S1') \p;
 
 #[38]	求所有北京工程都使用的零件号码。
-
+select distinct A.PNO from SPJ as A
+where not exists(select * from J where CITY='北京' and 
+not exists(select * from SPJ as B where J.JNO=B.JNO and A.PNO=B.PNO)) \p;
 
 #[39]	求对所有工程都提供了同一零件的供应商号码。
-
+select distinct SNO from S where exists
+(select * from P where not exists
+(select * from J where not exists
+(select * from SPJ where SPJ.SNO=S.SNO and SPJ.PNO=P.PNO and SPJ.JNO=J.JNO))) \p;
 
 #[40]	求使用了S1 提供的所有零件的工程号码。
 select JNO from J where not exists
