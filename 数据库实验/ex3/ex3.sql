@@ -160,10 +160,26 @@ insert into p1 from P where weight between 15 and 20 \p;
 insert into S values('S1','n2','上海') \p;#不能，因为SNO是主键不能重复。
 
 #[47]	把s、p、j三个表中的s#,p#,j#列进行交叉联接，把结果追加到spj1表中（如果只考虑下面表格中的原始数据，应该在spj1表中追加多少条记录？你是如何计算记录条数的？）。
-
+create table spj1(
+	SNO varchar(10),
+	SNAME varchar(10),
+	STATUS int,
+	CITY varchar(10),
+	PNO varchar(20),
+	PNAME varchar(10),
+	COLOR varchar(10),
+	WEIGHT int ,
+	JNO varchar(10),
+	JNAME varchar(10),
+	CITY2 varchar(10),
+);
+insert into spj1 select * from S cross join P cross join J;
 
 #[48]	向spj表追加（s6,p1,j6,1000）本操作能正确执行吗？为什么？如果追加(s4,p1,j6,-10) 行吗？如果现在想强制追加这两条记录该怎么办？
-
+alter table SPJ drop constraint fk_sno;#不行，要取消外键约束。
+alter table SPJ drop constraint fk_pno;
+alter table SPJ drop constraint fk_jno;
+alter table SPJ drop check SPJ_chk_1;#取消检查约束
 
 #[49]	把s1供应商供应的零件为p1的所有项目对应的数量qty改为500。
 update SPJ set QTY=500 where SNO='S1' and PNO='P1' \p;
@@ -180,20 +196,21 @@ update P set weight=case when weight>15 then weight+2
 when weight<15 then weight+3 else weight end \p;
 
 #[53]	删除为j7工程供应零件的所有供应商信息（如果建立外键时没有带级联删除选项，本操作能正确执行吗？为什么？）
-
+delete S from S,SPJ where SPJ.JNO='J1' and SPJ.SNO = S.SNO \p;
 
 #[54]	删除p1表中所有记录。
 delete from p1 \p;
 
 #[55]	删除供应商和工程在同一个城市的供应商信息。
-
+delete S from S,J,SPJ where S.CITY = J.CITY and S.SNO = SPJ.SNO and J.JNO = SPJ.JNO \p;
 
 #b)	请为三建工程项目建立一个供应情况的视图，包括供应商代码（SNO）、零件代码（PNO）、供应数量（QTY）。针对该视图完成下列查询：
-
+create view SanJianSupply as
+(select SNO, PNO, QTY from SPJ natural join J where JNAME='三建') \p;
 
 #[1]	找出三建工程项目使用的各种零件代码及其数量；
-
+select PNO, sum(QTY) from SanJianSupply group by PNO order by PNO \p;
 
 #[2]	找出供应商S1的供应情况；
-
+select * from SanJianSupply where SNO='S1' \p;
 
