@@ -147,16 +147,17 @@ select distinct PNO from SPJ, S, J
 where SPJ.SNO=S.SNO and SPJ.JNO=J.JNO and(S.CITY='北京' or J.CITY='北京') \p;
 
 #[43]	求所有supplier-number / part-number 对，其中指定的供应商不供应指定的零件。
-
+select distinct SNO as supplier_number, PNO as part_number
+from S, P where (SNO, PNO) not in (select SNO, PNO from SPJ) \p;
 
 #[44]	向p表追加如下记录（P0,PN0,蓝）。
-
+insert into P values('P0', 'PNO', '蓝',null) \p;
 
 #[45]	把零件重量在15到20之间的零件信息追加到新的表p1中。
-
+insert into p1 from P where weight between 15 and 20 \p;
 
 #[46]	向s表追加记录（s1, n2, ’上海’）能成功吗?为什么？
-
+insert into S values('S1','n2','上海') \p;#不能，因为SNO是主键不能重复。
 
 #[47]	把s、p、j三个表中的s#,p#,j#列进行交叉联接，把结果追加到spj1表中（如果只考虑下面表格中的原始数据，应该在spj1表中追加多少条记录？你是如何计算记录条数的？）。
 
@@ -165,27 +166,30 @@ where SPJ.SNO=S.SNO and SPJ.JNO=J.JNO and(S.CITY='北京' or J.CITY='北京') \p
 
 
 #[49]	把s1供应商供应的零件为p1的所有项目对应的数量qty改为500。
-
+update SPJ set QTY=500 where SNO='S1' and PNO='P1' \p;
 
 #[50]	把qty值大于等于1000的所有供应商城市更改为‘北京’ 。
-
+update S set CITY='北京' where SNO=(select SNO from SPJ where QTY>=1000) \p;
 
 #[51]	把j1更改成j7，本操作能正确执行吗？为什么？如果改成j0呢？spj表中记录有何变化？为什么？
-
+update J set JNO='J7' where JNO='J1';#不能，JNO是主键不可重复，J7已存在。
+update J set JNO='J0' where JNO='J1';#可以，spj中的J1一起变成J0。
 
 #[52]	把零件重量低于15的增加3，高于15的增加2。
-
+update P set weight=case when weight>15 then weight+2
+when weight<15 then weight+3 else weight end \p;
 
 #[53]	删除为j7工程供应零件的所有供应商信息（如果建立外键时没有带级联删除选项，本操作能正确执行吗？为什么？）
 
 
 #[54]	删除p1表中所有记录。
-
+delete from p1 \p;
 
 #[55]	删除供应商和工程在同一个城市的供应商信息。
 
 
 #b)	请为三建工程项目建立一个供应情况的视图，包括供应商代码（SNO）、零件代码（PNO）、供应数量（QTY）。针对该视图完成下列查询：
+
 
 #[1]	找出三建工程项目使用的各种零件代码及其数量；
 
