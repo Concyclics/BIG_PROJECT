@@ -14,7 +14,7 @@ MAXN=5
 MAXM=5
 #define for resources scheduling
 Available=full(MAXM,10)
-MaxNeed=random.randint(1, 20, size=(MAXN, MAXM))
+MaxNeed=random.randint(1, 10, size=(MAXN, MAXM))
 Allocation=zeros((MAXN, MAXM))
 Need=MaxNeed-Allocation
 #request matrix  [process NO, resource type]
@@ -29,9 +29,11 @@ def safe():
 	for i in range(MAXN):
 		if finish[i]==0:
 			for j in range(MAXM):
-				if Need[i, j]<=work[j]:
+				if Need[i][j]<=work[j]:
 					work[j]+=Allocation[i][j]
-					finish[i]=1
+				else:
+					break
+				finish[i]=1
 	for i in finish:
 		if i ==0:
 			return False
@@ -44,9 +46,9 @@ def bank():
 	for i in range(MAXN):
 		for j in range(MAXM):
 			logs+='\nin '+time.strftime('%Y年 %m月 %d日 %H:%M:%S',time.localtime(time.time()))
-			logs+='\nProcess '+str(i)+' requests for '+str(request[i][j])+' resource type:'+str(j)+'\n result: '
-			if request[i][j]>Need[i][j]:
-				logs+='the request is larger than MaxNeed! Failed!\n'
+			logs+='\nProcess '+str(i)+' requests for '+str(request[i][j])+' resource type:'+str(j)+'\n result:\n'
+			if request[i][j]>Need[i][j] or request[i][j]>Available[j]:
+				logs+='the request is too large! Failed!\n'
 			elif request[i][j]<=Available[j]:
 				Available[j]-=request[i][j]
 				Allocation[i][j]+=request[i][j]
@@ -61,7 +63,13 @@ def bank():
 
 
 if __name__=='__main__':
-	request+=random.randint(1, 10, size=(MAXN,MAXM))
+	i=0
+	for x in Available:
+		logs+='resource type'+str(i)+' quentity: '+str(x)+'\n'
+		i+=1
+	logs+='\n'+'MaxNeed matrix i for process, j for resource'
+	logs+='\n'+str(MaxNeed)+'\n'
+	request+=random.randint(1, 5, size=(MAXN,MAXM))
 	bank()
 	print(logs)
 	#write logs into file Banker_logs.txt
