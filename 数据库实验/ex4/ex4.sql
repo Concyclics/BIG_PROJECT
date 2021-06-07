@@ -4,7 +4,7 @@
 
 #1、创建U8，赋予U8在P表上的SELECT权限
 create user U8 identified by '19260817';
-grant select on db_spj.p to U0;
+grant select on db_spj.p to U8;
 
 
 #2、创建U9，赋予U9在SPJ表上qty的UPDATE权限
@@ -23,6 +23,7 @@ grant select, insert on db_spj.p to R2;
 
 #5、将R2授予U3和U8，使他们具有角色R2所包含的全部权限
 grant R2 to U3, U8;
+set default role R2 to U3, U8;
 
 
 #6、增加R2对P表的DELETE权限，并验证U8是否具有了这个权限？
@@ -31,7 +32,7 @@ grant delete on db_spj.p to R2;
 
 #7、创建一个作用在SPJ表上的触发器，确保无论在什么时候，qty均应大于零，否则给出错误提示并回滚此操作。请测试该触发器
 delimiter //
-create trigger qty_ins before insert on db_spj
+create trigger qty_ins before insert on spj
 for each row
 begin
 if new.qty<=0 then
@@ -44,7 +45,7 @@ end;
 delimiter ;
 
 delimiter //
-create trigger qty_upd before update on db_spj
+create trigger qty_upd before update on spj
 for each row
 begin
 if new.qty<=0 then
